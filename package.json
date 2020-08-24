@@ -1,0 +1,22 @@
+{
+  "name": "messenger-ts",
+  "version": "1.0.0",
+  "description": "Use messenger from the terminal",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run build && node build/index.js",
+    "build": "tsc"
+  },
+  "author": "Maher Brini",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^14.6.0",
+    "@types/readline-sync": "^1.4.3",
+    "typescript": "^4.0.2"
+  },
+  "dependencies": {
+    "facebook-chat-api": "^1.8.0",
+    "readline-sync": "^1.4.10"
+  }
+}
