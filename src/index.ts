@@ -1,12 +1,12 @@
-import Messenger from "./messenger";
+import Messenger from "./Messenger";
 import { question, questionEMail } from "readline-sync";
-import readline from "readline";
-import chalk from 'chalk';
+import chalk from "chalk";
+import dotenv from "dotenv";
+import Input from "./Input";
+dotenv.config();
 
-const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-      prompt: '> '});
+
+const input = new Input();
 const messengerClient = new Messenger();
 
 (async function () {
@@ -20,56 +20,30 @@ const messengerClient = new Messenger();
     } while (!messengerClient.isApiInitialized());
   }
   messengerClient.listen((err: any, event: any) => {
-    switch (event.type) {
-      case "message":
-        messengerClient.api.getUserInfo(event.senderID, (err: any, data: any) => {
-          console.log(`${chalk.blue(data[event.senderID].name)}: ${event.body}`);
-      });
-        break;
+    if (err) {
+      console.log("An error has occured while listening to events!");
+      if (process.env.DEBUG) {
+        console.log(`err: ${JSON.stringify(err)}`);
+      }
+    } else {
+      switch (event.type) {
+        case "message":
+          messengerClient._api.getUserInfo(
+            event.senderID,
+            (err: any, data: any) => {
+              console.log(
+                `${chalk.blue(data[event.senderID].name)}: ${event.body}`
+              );
+            }
+          );
+          break;
+      }
     }
   });
-  rl.prompt();
-  rl.on('line', input => {
-    input = input.trim();
-    let command;
-    if (input.indexOf(' ') > 0) {
-      command = input.substring(0, input.indexOf(' '));
-    }  else {
-      command = input;
-    }
 
-    switch (command) {
-      case "/m":
-      case "/message":
-        messengerClient.message(input.substring(input.indexOf(' ') + 1));
-        break;
-
-      case "/s":
-      case "/select":
-        if(input.indexOf(' ') > 0) {
-          messengerClient.select(input.substring(input.indexOf(' ') + 1));
-        } else {
-          console.log('Syntax: /s <name> | /select <name>')
-        }
-        break;
-      case "/help":
-        console.log("/help - shows this help page.");
-        console.log(`/select | /s - Select someone to message using their name. 
-                    For example: /s John Doe`);
-        console.log("/message | /m - Sends the text to the selected friend.");
-        console.log("/exit - exits the program.");
-        break;
-      case "/exit":
-        console.log("Farewell!");
-        process.exit(0);
-        break;
-      default:
-        console.log("Unknown command, see /help");
-        break;
-    }
-
-    rl.prompt();
-  });
+  // Starts asking for user input and provides the messengerClient object
+  // for further interaction.
+  input.prompt(messengerClient);
 })();
 
 async function loginWithFile() {
@@ -82,4 +56,4 @@ async function loginWithCredentials() {
   let email = questionEMail("Your email: ");
   let pass = question("Your password: ", { hideEchoBack: true });
   await messengerClient.login(email, pass);
-}
+} 
